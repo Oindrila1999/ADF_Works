@@ -1,0 +1,17 @@
+{
+	"name": "union_dataset_1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SqlServerLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "source1"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

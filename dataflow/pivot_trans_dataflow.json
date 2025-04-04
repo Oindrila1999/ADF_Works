@@ -1,0 +1,62 @@
+{
+	"name": "pivot_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "emp_source_dataset_for_pivot",
+						"type": "DatasetReference"
+					},
+					"name": "empsource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "pivot_out_sink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "pivotgender"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          gender as string,",
+				"          country as string,",
+				"          department as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> empsource",
+				"empsource pivot(groupBy(department),",
+				"     pivotBy(gender),",
+				"     {} = count(id),",
+				"     columnNaming: '$N$V',",
+				"     lateral: true) ~> pivotgender",
+				"pivotgender sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptid as string,",
+				"          count_of_emp as string",
+				"     ),",
+				"     partitionFileNames:['pivotted_output.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}

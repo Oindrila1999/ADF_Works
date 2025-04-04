@@ -1,0 +1,45 @@
+{
+	"name": "DelimitedTarget",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Linkedservice_StorageDemoOin",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"container": {
+				"type": "string"
+			},
+			"destFolder": {
+				"type": "string"
+			},
+			"destFile": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().destFile",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().destFolder",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

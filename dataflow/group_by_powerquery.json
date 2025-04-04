@@ -1,0 +1,20 @@
+{
+	"name": "group_by_powerquery",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "empdataset_derived_df",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> empdataset_derived_df",
+					"dataset": {
+						"referenceName": "empdataset_derived_df",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"script": "section Section1;\r\nshared empdataset_derived_df = let AdfDoc = AzureStorage.DataLakeContents(\"https://storageadlsdemooin.dfs.core.windows.net/adfdemooinadls/input/emp_for_derived.csv\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]),\r\n  #\"Changed column type\" = Table.TransformColumnTypes(PromotedHeaders, {{\"empid\", Int64.Type}, {\"age\", Int64.Type}}) in  #\"Changed column type\";\r\nshared UserQuery = let Source = #\"empdataset_derived_df\",\r\n  #\"Grouped rows\" = Table.Group(Source, {\"deptname\"}, {{\"TotalEmp\", each Table.RowCount(_), Int64.Type}}) in #\"Grouped rows\";\r\n",
+			"documentLocale": "en-us"
+		}
+	}
+}

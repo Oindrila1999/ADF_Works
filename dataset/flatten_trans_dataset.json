@@ -1,0 +1,37 @@
+{
+	"name": "flatten_trans_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Linkedservice_StorageDemoOin",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "complex_json_data_for_flatten.json",
+				"folderPath": "input",
+				"container": "adfdemoin"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"skills": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

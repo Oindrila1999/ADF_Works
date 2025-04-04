@@ -1,0 +1,28 @@
+{
+	"name": "output_dataset_lkp",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Linkedservice_StorageDemoOin",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Foldername": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "out_data_lkp_folder.txt",
+				"folderPath": {
+					"value": "@dataset().Foldername",
+					"type": "Expression"
+				},
+				"container": "adfdemoin"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

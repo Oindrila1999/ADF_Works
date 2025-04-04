@@ -1,0 +1,45 @@
+{
+	"name": "windows_trans_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Windows_trans_Dataflow",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "windows_trans_dataflow",
+						"type": "DataFlowReference",
+						"parameters": {
+							"Filename": {
+								"value": "'@{pipeline().parameters.filename}'",
+								"type": "Expression"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-04-02T10:50:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

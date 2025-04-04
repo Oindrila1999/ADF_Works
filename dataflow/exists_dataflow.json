@@ -1,0 +1,96 @@
+{
+	"name": "exists_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "empdataset_adls",
+						"type": "DatasetReference"
+					},
+					"name": "employee"
+				},
+				{
+					"dataset": {
+						"referenceName": "departmentdataset_adls",
+						"type": "DatasetReference"
+					},
+					"name": "department"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "exists_dataset_sink",
+						"type": "DatasetReference"
+					},
+					"name": "existssink"
+				},
+				{
+					"dataset": {
+						"referenceName": "exists_dataset_sink",
+						"type": "DatasetReference"
+					},
+					"name": "notexixtssink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "deptempexists"
+				},
+				{
+					"name": "deptnoempexists"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          name as string,",
+				"          country as string,",
+				"          deptid as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employee",
+				"source(output(",
+				"          deptid as integer,",
+				"          deptname as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> department",
+				"department, employee exists(department@deptid == employee@deptid,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> deptempexists",
+				"department, employee exists(department@deptid == employee@deptid,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> deptnoempexists",
+				"deptempexists sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as string,",
+				"          name as string,",
+				"          sales as string,",
+				"          date as string",
+				"     ),",
+				"     partitionFileNames:['dept_where_emp_exixts.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> existssink",
+				"deptnoempexists sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as string,",
+				"          name as string,",
+				"          sales as string,",
+				"          date as string",
+				"     ),",
+				"     partitionFileNames:['dept_where_no_emp_exixts.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> notexixtssink"
+			]
+		}
+	}
+}

@@ -1,0 +1,55 @@
+{
+	"name": "surr_key_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "input_dataset_sugg_key",
+						"type": "DatasetReference"
+					},
+					"name": "source"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "surr_ds_output",
+						"type": "DatasetReference"
+					},
+					"name": "surrkeysink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "surrogateKeygenerate"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Country as string,",
+				"          Emp as string",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source",
+				"source keyGenerate(output(empid as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKeygenerate",
+				"surrogateKeygenerate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as string,",
+				"          name as string,",
+				"          sales as string,",
+				"          date as string",
+				"     ),",
+				"     partitionFileNames:['surr_key_out.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> surrkeysink"
+			]
+		}
+	}
+}

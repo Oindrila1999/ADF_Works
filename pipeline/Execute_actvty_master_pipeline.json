@@ -1,0 +1,113 @@
+{
+	"name": "Execute_actvty_master_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute_1",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Copy_pipeline_params",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"container": {
+							"value": "@pipeline().parameters.container",
+							"type": "Expression"
+						},
+						"folder": {
+							"value": "@pipeline().parameters.srcfolder",
+							"type": "Expression"
+						},
+						"file": {
+							"value": "@pipeline().parameters.srcfile",
+							"type": "Expression"
+						},
+						"destFolder": {
+							"value": "@pipeline().parameters.destfolder",
+							"type": "Expression"
+						},
+						"destFile": {
+							"value": "@pipeline().parameters.destfile",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute_2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute_1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Set_var_pipeline",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"FileName": {
+							"value": "@pipeline().parameters.srcfile",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@pipeline().parameters.container",
+							"type": "Expression"
+						},
+						"sourceFolder": {
+							"value": "@pipeline().parameters.srcfolder",
+							"type": "Expression"
+						},
+						"destFolder": {
+							"value": "@pipeline().parameters.destfolder",
+							"type": "Expression"
+						},
+						"destFileext": {
+							"value": "@pipeline().parameters.destFileExt",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"container": {
+				"type": "string"
+			},
+			"srcfolder": {
+				"type": "string"
+			},
+			"srcfile": {
+				"type": "string"
+			},
+			"destfolder": {
+				"type": "string"
+			},
+			"destfile": {
+				"type": "string"
+			},
+			"destFileExt": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-03-30T11:28:32Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

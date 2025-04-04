@@ -1,0 +1,71 @@
+{
+	"name": "derived_column_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "empdataset_derived_df",
+						"type": "DatasetReference"
+					},
+					"name": "empdetails"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "emp_details_table_ds",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumnCountry"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          name as string,",
+				"          country as string,",
+				"          deptname as string,",
+				"          age as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> empdetails",
+				"empdetails derive(country = iifNull(country,'No country present'),",
+				"          Age_group = iif(age < 25 , 'young', iif((age >= 25 && age < 50), 'adult', 'senior'))) ~> derivedColumnCountry",
+				"derivedColumnCountry sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          ename as string,",
+				"          country as string,",
+				"          deptname as string,",
+				"          age as integer,",
+				"          AGE_GROUP as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id = empid,",
+				"          ename = name,",
+				"          country,",
+				"          deptname,",
+				"          age,",
+				"          AGE_GROUP = Age_group",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

@@ -1,0 +1,72 @@
+{
+	"name": "Merge_queries_powerquery_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Merge_queries_powerquery",
+				"type": "ExecuteWranglingDataflow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Execution of",
+						"value": "Here we are executing the Power Query for wrangling data flow in ADF."
+					}
+				],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "merge_queries_powerquery",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"UserQueryempdeptpowerqueryds": {
+								"Filename": {
+									"value": "@pipeline().parameters.Filename",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"queries": [
+						{
+							"queryName": "UserQuery",
+							"dataflowSinks": [
+								{
+									"name": "UserQueryempdeptpowerqueryds",
+									"dataset": {
+										"referenceName": "emp_dept_power_query_ds",
+										"type": "DatasetReference",
+										"parameters": {
+											"Filename": {
+												"value": "@pipeline().parameters.Filename",
+												"type": "Expression"
+											}
+										}
+									},
+									"script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tdeptid as string,\n\t\tcount_of_emp as string\n\t),\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UserQueryempdeptpowerqueryds"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Filename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-04-04T05:34:05Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,34 @@
+{
+	"name": "input_dataset_sugg_key",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Linkedservice_StorageDemoOin",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "sugg_key_test.csv",
+				"folderPath": "input",
+				"container": "adfdemoin"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Oindrila",
+				"type": "String"
+			},
+			{
+				"name": "Mete",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

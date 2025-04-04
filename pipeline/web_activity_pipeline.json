@@ -1,0 +1,66 @@
+{
+	"name": "web_activity_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web_get",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "web_request_type",
+						"value": "This is a get request"
+					}
+				],
+				"typeProperties": {
+					"method": "GET",
+					"url": "https://dummyjson.com/products"
+				}
+			},
+			{
+				"name": "Web_post",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Web_get",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "web_activity",
+						"value": "This is a post method"
+					}
+				],
+				"typeProperties": {
+					"method": "POST",
+					"url": "https://dummy.restapiexample.com/api/v1/create",
+					"body": {
+						"name": "test",
+						"salary": "123",
+						"age": "23"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2025-03-30T18:04:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

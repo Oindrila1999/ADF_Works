@@ -1,0 +1,65 @@
+{
+	"name": "sort_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "empDataset_lkp_transformation",
+						"type": "DatasetReference"
+					},
+					"name": "employee"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "emp_sort_trans_dataset",
+						"type": "DatasetReference"
+					},
+					"name": "emporderedsink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "sortdeptidcntry"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          name as string,",
+				"          country as string,",
+				"          deptid as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employee",
+				"employee sort(asc(deptid, true),",
+				"     desc(country, true)) ~> sortdeptidcntry",
+				"sortdeptidcntry sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          empid as integer,",
+				"          name as string,",
+				"          country as string,",
+				"          deptid as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          empid,",
+				"          name,",
+				"          country,",
+				"          deptid",
+				"     )) ~> emporderedsink"
+			]
+		}
+	}
+}

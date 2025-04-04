@@ -1,0 +1,29 @@
+{
+	"name": "Append_var_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Append list of file names",
+				"type": "AppendVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ListOfiles",
+					"value": {
+						"value": "\"SalesIndia\"",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"ListOfiles": {
+				"type": "Array",
+				"defaultValue": []
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-03-30T11:28:32Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

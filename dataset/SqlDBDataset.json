@@ -1,0 +1,17 @@
+{
+	"name": "SqlDBDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SqlServerLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "OUTPUTFOLDERS"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

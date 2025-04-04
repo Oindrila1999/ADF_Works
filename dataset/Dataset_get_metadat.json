@@ -1,0 +1,20 @@
+{
+	"name": "Dataset_get_metadat",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Linkedservice_StorageDemoOin",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "data.txt",
+				"folderPath": "input",
+				"container": "adfdemoin"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

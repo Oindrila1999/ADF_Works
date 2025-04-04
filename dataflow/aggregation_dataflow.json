@@ -1,0 +1,56 @@
+{
+	"name": "aggregation_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "emopdetails_agg_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "empdetails"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "empcount_out_agg_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "empaggdata"
+				}
+			],
+			"transformations": [
+				{
+					"name": "empcount"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     filename as string",
+				"}",
+				"source(output(",
+				"          empid as short,",
+				"          name as string,",
+				"          country as string,",
+				"          deptname as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> empdetails",
+				"empdetails aggregate(groupBy(deptname),",
+				"     Employee_count = count(empid)) ~> empcount",
+				"empcount sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:[($filename)],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> empaggdata"
+			]
+		}
+	}
+}

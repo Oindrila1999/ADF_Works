@@ -1,0 +1,32 @@
+{
+	"name": "trigger_pipeline_params",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Copy_pipeline_params",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"container": "adfdemoin",
+					"folder": "input",
+					"file": "empsorceData.csv",
+					"destFolder": "output",
+					"destFile": "test_params.csv"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2025-03-30T13:43:00",
+				"endTime": "2025-03-30T13:44:00",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}

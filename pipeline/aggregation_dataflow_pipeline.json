@@ -1,0 +1,67 @@
+{
+	"name": "aggregation_dataflow_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Aggregation_dataflow",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "aggregation_dataflow",
+						"type": "DataFlowReference",
+						"parameters": {
+							"filename": {
+								"value": "'@{pipeline().parameters.destfile}'",
+								"type": "Expression"
+							}
+						},
+						"datasetParameters": {
+							"empaggdata": {
+								"filesystem": {
+									"value": "@pipeline().parameters.Filesystem",
+									"type": "Expression"
+								},
+								"destfolder": {
+									"value": "@pipeline().parameters.destfolder",
+									"type": "Expression"
+								},
+								"destfile": {
+									"value": "@pipeline().parameters.destfile",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"Filesystem": {
+				"type": "string"
+			},
+			"destfolder": {
+				"type": "string"
+			},
+			"destfile": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-03-31T14:11:33Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

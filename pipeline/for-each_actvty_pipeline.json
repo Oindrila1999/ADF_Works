@@ -1,0 +1,125 @@
+{
+	"name": "for-each_actvty_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.destfolder",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 2,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceDataset_foreach",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.container",
+											"type": "Expression"
+										},
+										"srcfolder": {
+											"value": "@pipeline().parameters.srcfolder",
+											"type": "Expression"
+										},
+										"srcfile": {
+											"value": "@pipeline().parameters.srcfile",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "OutputDataset_foreach",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@pipeline().parameters.container",
+											"type": "Expression"
+										},
+										"destfolder": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"destfile": {
+											"value": "@pipeline().parameters.destfile",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"container": {
+				"type": "string"
+			},
+			"srcfolder": {
+				"type": "string"
+			},
+			"srcfile": {
+				"type": "string"
+			},
+			"destfolder": {
+				"type": "array",
+				"defaultValue": [
+					"out1",
+					"out2",
+					"out3"
+				]
+			},
+			"destfile": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"metadataOutput": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-03-30T13:57:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

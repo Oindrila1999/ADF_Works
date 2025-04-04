@@ -1,0 +1,66 @@
+{
+	"name": "windows_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "input_ds_window_trans",
+						"type": "DatasetReference"
+					},
+					"name": "sourceforranking"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "window_trans_out_ds",
+						"type": "DatasetReference"
+					},
+					"name": "windowssink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "windowtransbydept"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     Filename as string",
+				"}",
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          gender as string,",
+				"          salary as integer,",
+				"          dept as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceforranking",
+				"sourceforranking window(over(dept),",
+				"     desc(salary, true),",
+				"     dense_rank = denseRank(),",
+				"          rank = rank(),",
+				"          row_num = rowNumber(),",
+				"          cum_sum = cumeDist(),",
+				"          avg_sal = avg(salary)) ~> windowtransbydept",
+				"windowtransbydept sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptid as string,",
+				"          count_of_emp as string",
+				"     ),",
+				"     partitionFileNames:[($Filename)],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> windowssink"
+			]
+		}
+	}
+}

@@ -1,0 +1,56 @@
+{
+	"name": "filter_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "emp_dept_dataset",
+						"type": "DatasetReference"
+					},
+					"name": "empdept"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "sinkdataset_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "filteredemp"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filterdept"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          empname as string,",
+				"          country as string,",
+				"          deptname as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> empdept",
+				"empdept filter(equals(deptname,'Payroll')) ~> filterdept",
+				"filterdept sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as string,",
+				"          name as string,",
+				"          sales as string,",
+				"          date as string",
+				"     ),",
+				"     partitionFileNames:['Payrollemp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> filteredemp"
+			]
+		}
+	}
+}

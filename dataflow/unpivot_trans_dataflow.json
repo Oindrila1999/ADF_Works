@@ -1,0 +1,63 @@
+{
+	"name": "unpivot_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "source_ds_unpivot",
+						"type": "DatasetReference"
+					},
+					"name": "sourceforunpivot"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "unpivot_out_dataset",
+						"type": "DatasetReference"
+					},
+					"name": "unpivotoutsink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "unpivot"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          PO as integer,",
+				"          Vendor as string,",
+				"          Apple as integer,",
+				"          Mango as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceforunpivot",
+				"sourceforunpivot unpivot(output(",
+				"          Fruits as string,",
+				"          Amount as integer",
+				"     ),",
+				"     ungroupBy(Vendor,",
+				"          PO),",
+				"     lateral: true,",
+				"     ignoreNullPivots: false) ~> unpivot",
+				"unpivot sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptid as string,",
+				"          count_of_emp as string",
+				"     ),",
+				"     partitionFileNames:['purcchase_order_unpivot.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> unpivotoutsink"
+			]
+		}
+	}
+}

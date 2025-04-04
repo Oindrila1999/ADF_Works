@@ -1,0 +1,9 @@
+{
+	"name": "ADFDemoOindrila",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4738bc32-a721-44e0-af7d-2a0dad90a1f2",
+		"tenantId": "d190dabc-b32b-45d1-8fa5-dec58f0885a2"
+	}
+}

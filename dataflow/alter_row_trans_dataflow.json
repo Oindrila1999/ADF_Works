@@ -1,0 +1,69 @@
+{
+	"name": "alter_row_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "input_ds_window_trans",
+						"type": "DatasetReference"
+					},
+					"name": "sourcedsemp"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "alter_row_out_ds",
+						"type": "DatasetReference"
+					},
+					"name": "sinktbloutput"
+				}
+			],
+			"transformations": [
+				{
+					"name": "alterRows"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          gender as string,",
+				"          salary as integer,",
+				"          dept as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourcedsemp",
+				"sourcedsemp alterRow(deleteIf(dept=='Payroll'),",
+				"     upsertIf(dept=='HR')) ~> alterRows",
+				"alterRows sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          name as string,",
+				"          gender as string,",
+				"          salary as integer,",
+				"          dept as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:true,",
+				"     keys:['id'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          gender,",
+				"          salary,",
+				"          dept",
+				"     )) ~> sinktbloutput"
+			]
+		}
+	}
+}

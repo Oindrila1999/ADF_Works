@@ -1,0 +1,28 @@
+{
+	"name": "merge_queries_powerquery",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "empdataset_adls",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> empdataset_adls",
+					"dataset": {
+						"referenceName": "empdataset_adls",
+						"type": "DatasetReference"
+					}
+				},
+				{
+					"name": "departmentdataset_adls",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> departmentdataset_adls",
+					"dataset": {
+						"referenceName": "departmentdataset_adls",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"script": "section Section1;\r\nshared empdataset_adls = let AdfDoc = AzureStorage.DataLakeContents(\"https://storageadlsdemooin.dfs.core.windows.net/adfdemooinadls/input/employees.csv\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]) in  PromotedHeaders;\r\nshared departmentdataset_adls = let AdfDoc = AzureStorage.DataLakeContents(\"https://storageadlsdemooin.dfs.core.windows.net/adfdemooinadls/input/department.csv\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]) in  PromotedHeaders;\r\nshared UserQuery = let Source = #\"empdataset_adls\",\r\n  #\"Merged queries\" = Table.NestedJoin(Source, {\"deptid\"}, departmentdataset_adls, {\"deptid\"}, \"departmentdataset_adls\", JoinKind.Inner),\r\n  #\"Expanded departmentdataset_adls\" = Table.ExpandTableColumn(#\"Merged queries\", \"departmentdataset_adls\", {\"deptname\"}, {\"deptname\"}) in #\"Expanded departmentdataset_adls\";\r\n",
+			"documentLocale": "en-us"
+		}
+	}
+}

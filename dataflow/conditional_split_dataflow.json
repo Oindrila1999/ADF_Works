@@ -1,0 +1,107 @@
+{
+	"name": "conditional_split_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "emopdetails_agg_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "employee"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "split_dataflow_ds",
+						"type": "DatasetReference"
+					},
+					"name": "ITemp"
+				},
+				{
+					"dataset": {
+						"referenceName": "split_dataflow_ds",
+						"type": "DatasetReference"
+					},
+					"name": "PayrollEmp"
+				},
+				{
+					"dataset": {
+						"referenceName": "split_dataflow_ds",
+						"type": "DatasetReference"
+					},
+					"name": "HREmp"
+				},
+				{
+					"dataset": {
+						"referenceName": "split_dataflow_ds",
+						"type": "DatasetReference"
+					},
+					"name": "DefaultEmp"
+				}
+			],
+			"transformations": [
+				{
+					"name": "splitBasedOnDept"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as short,",
+				"          name as string,",
+				"          country as string,",
+				"          deptname as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employee",
+				"employee split(equals(deptname, 'IT'),",
+				"     equals(deptname,'HR'),",
+				"     equals(deptname,'PAYROLL'),",
+				"     disjoint: false) ~> splitBasedOnDept@(IT, HR, PAYROLL, Otherdept)",
+				"splitBasedOnDept@IT sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptname as string,",
+				"          Employee_count as string",
+				"     ),",
+				"     partitionFileNames:['ITEmp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> ITemp",
+				"splitBasedOnDept@PAYROLL sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptname as string,",
+				"          Employee_count as string",
+				"     ),",
+				"     partitionFileNames:['PayrollEmp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> PayrollEmp",
+				"splitBasedOnDept@HR sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptname as string,",
+				"          Employee_count as string",
+				"     ),",
+				"     partitionFileNames:['HREmp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> HREmp",
+				"splitBasedOnDept@Otherdept sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptname as string,",
+				"          Employee_count as string",
+				"     ),",
+				"     partitionFileNames:['OtherEmp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> DefaultEmp"
+			]
+		}
+	}
+}

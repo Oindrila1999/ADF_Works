@@ -1,0 +1,99 @@
+{
+	"name": "new_branch_work_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "empDataset_lkp_transformation",
+						"type": "DatasetReference"
+					},
+					"name": "employee"
+				},
+				{
+					"dataset": {
+						"referenceName": "deptDataset_lkp_transformation",
+						"type": "DatasetReference"
+					},
+					"name": "department"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "empcountdataset_sink",
+						"type": "DatasetReference"
+					},
+					"name": "empcountsink"
+				},
+				{
+					"dataset": {
+						"referenceName": "joineddataset_sink",
+						"type": "DatasetReference"
+					},
+					"name": "joineddatasink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "countemp"
+				},
+				{
+					"name": "joinempdept"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          name as string,",
+				"          country as string,",
+				"          deptid as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employee",
+				"source(output(",
+				"          deptid as integer,",
+				"          deptname as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> department",
+				"employee aggregate(groupBy(deptid),",
+				"     count_of_emp = count(empid)) ~> countemp",
+				"employee, department join(employee@deptid == department@deptid,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinempdept",
+				"countemp sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptname as string,",
+				"          Employee_count as string",
+				"     ),",
+				"     partitionFileNames:['Emp_count_dept_wise.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> empcountsink",
+				"joinempdept sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptname as string,",
+				"          Employee_count as string",
+				"     ),",
+				"     partitionFileNames:['Joined_emp_dept.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> joineddatasink"
+			]
+		}
+	}
+}
