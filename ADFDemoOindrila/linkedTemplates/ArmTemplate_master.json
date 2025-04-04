@@ -1,0 +1,226 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ADFDemoOindrila"
+		},
+		"AzureDataLakeStorageLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorageLS'"
+		},
+		"Linkedservice_StorageDemoOin_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Linkedservice_StorageDemoOin'"
+		},
+		"SqlServerLS_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SqlServerLS'"
+		},
+		"AzureDataLakeStorageLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://storageadlsdemooin.dfs.core.windows.net/"
+		},
+		"SqlServerLS_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "myserver789.database.windows.net"
+		},
+		"SqlServerLS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "MySampleDB"
+		},
+		"SqlServerLS_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adminuser"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container": {
+			"type": "string",
+			"defaultValue": "adfdemoin"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_folder": {
+			"type": "string",
+			"defaultValue": "input"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_file": {
+			"type": "string",
+			"defaultValue": "empsorceData.csv"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFolder": {
+			"type": "string",
+			"defaultValue": "output"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFile": {
+			"type": "string",
+			"defaultValue": "test_params.csv"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureDataLakeStorageLS_accountKey": {
+						"value": "[parameters('AzureDataLakeStorageLS_accountKey')]"
+					},
+					"Linkedservice_StorageDemoOin_connectionString": {
+						"value": "[parameters('Linkedservice_StorageDemoOin_connectionString')]"
+					},
+					"SqlServerLS_password": {
+						"value": "[parameters('SqlServerLS_password')]"
+					},
+					"AzureDataLakeStorageLS_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorageLS_properties_typeProperties_url')]"
+					},
+					"SqlServerLS_properties_typeProperties_server": {
+						"value": "[parameters('SqlServerLS_properties_typeProperties_server')]"
+					},
+					"SqlServerLS_properties_typeProperties_database": {
+						"value": "[parameters('SqlServerLS_properties_typeProperties_database')]"
+					},
+					"SqlServerLS_properties_typeProperties_userName": {
+						"value": "[parameters('SqlServerLS_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container": {
+						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container')]"
+					},
+					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_folder": {
+						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_folder')]"
+					},
+					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_file": {
+						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_file')]"
+					},
+					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFolder": {
+						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFolder')]"
+					},
+					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFile": {
+						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFile')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_4')]"
+			]
+		}
+	]
+}

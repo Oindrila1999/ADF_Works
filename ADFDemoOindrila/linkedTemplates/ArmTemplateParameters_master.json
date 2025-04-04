@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "ADFDemoOindrila"
+		},
+		"AzureDataLakeStorageLS_accountKey": {
+			"value": ""
+		},
+		"Linkedservice_StorageDemoOin_connectionString": {
+			"value": ""
+		},
+		"SqlServerLS_password": {
+			"value": ""
+		},
+		"AzureDataLakeStorageLS_properties_typeProperties_url": {
+			"value": "https://storageadlsdemooin.dfs.core.windows.net/"
+		},
+		"SqlServerLS_properties_typeProperties_server": {
+			"value": "myserver789.database.windows.net"
+		},
+		"SqlServerLS_properties_typeProperties_database": {
+			"value": "MySampleDB"
+		},
+		"SqlServerLS_properties_typeProperties_userName": {
+			"value": "adminuser"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container": {
+			"value": "adfdemoin"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_folder": {
+			"value": "input"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_file": {
+			"value": "empsorceData.csv"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFolder": {
+			"value": "output"
+		},
+		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFile": {
+			"value": "test_params.csv"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
