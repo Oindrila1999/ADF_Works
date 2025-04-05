@@ -41,6 +41,7 @@
 				"     output(salary_ranking as long)) ~> rankOnsalary",
 				"rankOnsalary sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     partitionFileNames:['Out_ranked_sal.csv'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
