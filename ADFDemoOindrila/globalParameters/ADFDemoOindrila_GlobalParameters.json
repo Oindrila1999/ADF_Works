@@ -1,1 +1,6 @@
-{}
+{
+	"adlsinputpath": {
+		"type": "string",
+		"value": "adfdemooinadls/input/"
+	}
+}
