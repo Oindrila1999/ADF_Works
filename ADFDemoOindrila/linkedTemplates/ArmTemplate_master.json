@@ -220,6 +220,26 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_5')]"
+			]
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_7",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_7.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container": {
 						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container')]"
@@ -239,7 +259,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_5')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_6')]"
 			]
 		}
 	]
