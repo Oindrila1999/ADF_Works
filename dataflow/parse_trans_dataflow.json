@@ -1,0 +1,75 @@
+{
+	"name": "parse_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_tbl_employee",
+						"type": "DatasetReference"
+					},
+					"name": "emptable"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "out_parse_trans",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "parseskills"
+				},
+				{
+					"name": "parseaddress"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          empname as string,",
+				"          skills as string,",
+				"          address as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> emptable",
+				"emptable parse(Parseskills = skills ? (skill1 as string,",
+				"          skill2 as string,",
+				"          skill3 as string),",
+				"     format: 'delimited',",
+				"     columnNamesAsHeader: false,",
+				"     columnDelimiter: '|',",
+				"     nullValue: '') ~> parseskills",
+				"parseskills parse(Parseaddress = address ? (city as string,",
+				"          country as string),",
+				"     format: 'json',",
+				"     documentForm: 'singleDocument') ~> parseaddress",
+				"parseaddress sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['Parse_trans_out.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          empid,",
+				"          empname,",
+				"          skill1 = Parseskills.skill1,",
+				"          skill2 = Parseskills.skill2,",
+				"          skill3 = Parseskills.skill3,",
+				"          city = Parseaddress.city,",
+				"          country = Parseaddress.country",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}
