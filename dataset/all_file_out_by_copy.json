@@ -1,5 +1,5 @@
 {
-	"name": "emp_table_out_by_copy",
+	"name": "all_file_out_by_copy",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorageLS",
@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "output_all_tables",
+				"folderPath": "output_all_files",
 				"fileSystem": "adfdemooinadls"
 			},
 			"columnDelimiter": ",",
