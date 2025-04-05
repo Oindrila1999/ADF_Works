@@ -1,5 +1,13 @@
 {
 	"name": "ADFDemoOindrila",
+	"properties": {
+		"globalParameters": {
+			"adlsinputpath": {
+				"type": "string",
+				"value": "adfdemooinadls/input/"
+			}
+		}
+	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
