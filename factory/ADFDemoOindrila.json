@@ -4,7 +4,7 @@
 		"globalParameters": {
 			"adlsinputpath": {
 				"type": "string",
-				"value": "adfdemooinadls / input"
+				"value": "adfdemooinadls/input/"
 			}
 		}
 	},
