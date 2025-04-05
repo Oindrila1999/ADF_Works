@@ -1,0 +1,12 @@
+{
+	"name": "ds_all_tables",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SqlServerLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}
