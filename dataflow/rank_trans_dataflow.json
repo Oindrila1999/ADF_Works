@@ -1,0 +1,61 @@
+{
+	"name": "rank_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "input_ds_window_trans",
+						"type": "DatasetReference"
+					},
+					"name": "empdata"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "out_ds_for_rank",
+						"type": "DatasetReference"
+					},
+					"name": "rankedsink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "rankOnsalary"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          gender as string,",
+				"          salary as integer,",
+				"          dept as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> empdata",
+				"empdata rank(desc(salary, true),",
+				"     output(salary_ranking as long)) ~> rankOnsalary",
+				"rankOnsalary sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          gender,",
+				"          salary,",
+				"          dept,",
+				"          salary_ranking",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> rankedsink"
+			]
+		}
+	}
+}
