@@ -1,0 +1,128 @@
+{
+	"name": "cache_sink_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "emp_table_ds",
+						"type": "DatasetReference"
+					},
+					"name": "emptable"
+				},
+				{
+					"dataset": {
+						"referenceName": "emp_details_1_ds",
+						"type": "DatasetReference"
+					},
+					"name": "empdetails1"
+				},
+				{
+					"dataset": {
+						"referenceName": "country_table_ds",
+						"type": "DatasetReference"
+					},
+					"name": "countrytable"
+				}
+			],
+			"sinks": [
+				{
+					"name": "cacheMaxEmpID"
+				},
+				{
+					"name": "cacheCountryName"
+				},
+				{
+					"dataset": {
+						"referenceName": "emp_table_ds",
+						"type": "DatasetReference"
+					},
+					"name": "emptableinserts"
+				}
+			],
+			"transformations": [
+				{
+					"name": "generateempid"
+				},
+				{
+					"name": "derivedColumnempid"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          maxEmpID as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max(empid) as maxEmpID from emp_table',",
+				"     format: 'query') ~> emptable",
+				"source(output(",
+				"          name as string,",
+				"          gender as string,",
+				"          country as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> empdetails1",
+				"source(output(",
+				"          code as string,",
+				"          country as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> countrytable",
+				"empdetails1 keyGenerate(output(empid as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> generateempid",
+				"generateempid derive(empid = cacheMaxEmpID#output().maxEmpID + empid,",
+				"          country = cacheCountryName#lookup(country).country) ~> derivedColumnempid",
+				"emptable sink(validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     store: 'cache',",
+				"     format: 'inline',",
+				"     output: false,",
+				"     saveOrder: 0,",
+				"     mapColumn(",
+				"          maxEmpID",
+				"     )) ~> cacheMaxEmpID",
+				"countrytable sink(validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     keys:['code'],",
+				"     store: 'cache',",
+				"     format: 'inline',",
+				"     output: false,",
+				"     saveOrder: 0,",
+				"     mapColumn(",
+				"          code,",
+				"          country",
+				"     )) ~> cacheCountryName",
+				"derivedColumnempid sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          empid as integer,",
+				"          name as string,",
+				"          gender as string,",
+				"          country as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          empid,",
+				"          name,",
+				"          gender,",
+				"          country",
+				"     )) ~> emptableinserts"
+			]
+		}
+	}
+}
