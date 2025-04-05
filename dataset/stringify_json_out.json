@@ -1,0 +1,19 @@
+{
+	"name": "stringify_json_out",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "output",
+				"fileSystem": "adfdemooinadls"
+			}
+		},
+		"schema": {}
+	}
+}

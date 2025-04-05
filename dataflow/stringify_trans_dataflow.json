@@ -1,0 +1,57 @@
+{
+	"name": "stringify_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_json_stringify",
+						"type": "DatasetReference"
+					},
+					"name": "jsondata"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "stringify_json_out",
+						"type": "DatasetReference"
+					},
+					"name": "stringifysink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "stringify"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          name as string,",
+				"          skills as string[],",
+				"          contact as (mobile as string, landline as string)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> jsondata",
+				"jsondata stringify(contactStringify = contact ? string,",
+				"     format: 'json') ~> stringify",
+				"stringify derive(contactStringify = toString(contactStringify)) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['stringify_out.json'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> stringifysink"
+			]
+		}
+	}
+}
