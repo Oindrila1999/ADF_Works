@@ -1,0 +1,44 @@
+{
+	"name": "ds_json_stringify",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "demo.json",
+				"folderPath": "input",
+				"fileSystem": "adfdemooinadls"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"skills": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"contact": {
+					"type": "object",
+					"properties": {
+						"mobile": {
+							"type": "string"
+						},
+						"landline": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		}
+	}
+}
