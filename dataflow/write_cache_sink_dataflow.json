@@ -39,8 +39,11 @@
 				"     skipDuplicateMapOutputs: true,",
 				"     store: 'cache',",
 				"     format: 'inline',",
-				"     output: false,",
-				"     saveOrder: 1) ~> cacheMaxSal"
+				"     output: true,",
+				"     saveOrder: 1,",
+				"     mapColumn(",
+				"          max_sal",
+				"     )) ~> cacheMaxSal"
 			]
 		}
 	}
