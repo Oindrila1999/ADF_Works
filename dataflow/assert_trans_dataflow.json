@@ -1,0 +1,77 @@
+{
+	"name": "assert_trans_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_input_assert",
+						"type": "DatasetReference"
+					},
+					"name": "emp"
+				},
+				{
+					"dataset": {
+						"referenceName": "dept_input_assert",
+						"type": "DatasetReference"
+					},
+					"name": "dept"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_output_assert",
+						"type": "DatasetReference"
+					},
+					"name": "sinkassert"
+				}
+			],
+			"transformations": [
+				{
+					"name": "assert1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empid as integer,",
+				"          ename as string,",
+				"          gender as string,",
+				"          doj as string,",
+				"          deptid as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> emp",
+				"source(output(",
+				"          deptid as integer,",
+				"          deptname as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> dept",
+				"emp, dept assert(expectTrue(!isNull(toDate(doj, 'yyyymmdd')), false, 'assert1'),",
+				"     expectExists(emp@deptid == dept@deptid, false, 'assert2'),",
+				"     expectUnique(empid, false, 'assert3')) ~> assert1",
+				"assert1 derive(Error_info = isError()) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          deptid as string,",
+				"          count_of_emp as string",
+				"     ),",
+				"     partitionFileNames:['assert_out.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sinkassert"
+			]
+		}
+	}
+}
