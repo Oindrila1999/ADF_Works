@@ -1,0 +1,76 @@
+{
+	"name": "TransformSalesData_dataflow",
+	"properties": {
+		"folder": {
+			"name": "herovired_project"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "sales_output_herovired_ds",
+						"type": "DatasetReference"
+					},
+					"name": "salessource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "sink_sales_data_dataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "castingdtypes"
+				},
+				{
+					"name": "selectcolumns"
+				},
+				{
+					"name": "aggtotalrevenue"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          product as string,",
+				"          amount as string,",
+				"          {date } as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> salessource",
+				"salessource derive(amount_float = toFloat(amount),",
+				"          date_actual = toDate({date },'yyyy-MM-dd')) ~> castingdtypes",
+				"castingdtypes select(mapColumn(",
+				"          order_id,",
+				"          product,",
+				"          amount_float,",
+				"          date_actual",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectcolumns",
+				"selectcolumns aggregate(groupBy(date_actual),",
+				"     total_revenue = sum(amount_float)) ~> aggtotalrevenue",
+				"aggtotalrevenue sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['revenue_by_date.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          date_actual,",
+				"          total_revenue",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}
