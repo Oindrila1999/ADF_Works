@@ -14,33 +14,35 @@
 				},
 				{
 					"name": "input1"
+				},
+				{
+					"name": "flowletremovedup"
 				}
 			],
 			"scriptLines": [
 				"input(output(",
 				"          id as integer,",
 				"          name as string,",
-				"          gender as string,",
-				"          deptid as integer,",
-				"          deptname as string",
+				"          gender as string",
 				"     ),",
 				"     order: 0,",
 				"     allowSchemaDrift: true) ~> input1",
 				"input1 aggregate(groupBy(id,",
 				"          name,",
-				"          gender,",
-				"          deptid,",
-				"          deptname),",
+				"          gender),",
 				"     count = count()) ~> aggregate1",
 				"aggregate1 select(mapColumn(",
 				"          id,",
 				"          name,",
-				"          gender,",
-				"          deptid,",
-				"          deptname",
+				"          gender",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 output(mapColumn(",
+				"          id,",
+				"          name,",
+				"          gender",
+				"     )) ~> flowletremovedup"
 			]
 		}
 	}
