@@ -1,0 +1,27 @@
+{
+	"name": "ds_sink_bad_sc_1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SqlServerLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"BadTableName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Scenario-based-question/scenario-1"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@dataset().BadTableName",
+				"type": "Expression"
+			}
+		}
+	}
+}
