@@ -57,7 +57,7 @@
 				"     disjoint: false) ~> splitbasedondatavalidation@(goodRec, badRec)",
 				"splitbasedondatavalidation@goodRec derive(FileName = 'salesIND-2020-MAY-01.csv',",
 				"          saleDate = toDate(saleDate, 'dd-MMM-yyyy')) ~> derivedfilename",
-				"splitbasedondatavalidation@badRec derive(FileName = 'salesIND-2020-MAY-01-bad-record.csv') ~> derivedfileName1",
+				"splitbasedondatavalidation@badRec derive(BadFile = 'sales-bad-record.csv') ~> derivedfileName1",
 				"derivedfilename sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -95,7 +95,7 @@
 				"          saleItem,",
 				"          country,",
 				"          quantity,",
-				"          FileName",
+				"          filename = BadFile",
 				"     )) ~> tblsalesbadsink"
 			]
 		}
