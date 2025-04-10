@@ -1,0 +1,27 @@
+{
+	"name": "ds_files_for_delete_dynamically",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"files": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().files",
+					"type": "Expression"
+				},
+				"folderPath": "scenario-4",
+				"fileSystem": "scenario-practice"
+			}
+		}
+	}
+}
