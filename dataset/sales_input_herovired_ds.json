@@ -5,6 +5,9 @@
 			"referenceName": "AzureDataLakeStorageLS",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "herovired_project"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
