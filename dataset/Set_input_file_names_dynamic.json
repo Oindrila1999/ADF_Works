@@ -1,20 +1,29 @@
 {
-	"name": "sales_output_herovired_ds",
+	"name": "Set_input_file_names_dynamic",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorageLS",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Filename": {
+				"type": "string"
+			}
+		},
 		"folder": {
-			"name": "herovired_project"
+			"name": "Scenario-based-question/scenario-2"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "sales_data.csv",
-				"fileSystem": "herovired-raw"
+				"fileName": {
+					"value": "@dataset().Filename",
+					"type": "Expression"
+				},
+				"folderPath": "scenario-2/input",
+				"fileSystem": "scenario-practice"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",

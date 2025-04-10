@@ -1,21 +1,20 @@
 {
-	"name": "sales_input_herovired_ds",
+	"name": "ds_source_sc_4",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorageLS",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "herovired_project"
+			"name": "Scenario-based-question/scenario-4"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "sales_data.csv",
-				"folderPath": "input",
-				"fileSystem": "herovired-anydata"
+				"folderPath": "scenario-4",
+				"fileSystem": "scenario-practice"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
@@ -24,19 +23,15 @@
 		},
 		"schema": [
 			{
-				"name": "order_id",
+				"name": "id",
 				"type": "String"
 			},
 			{
-				"name": "product",
+				"name": "name",
 				"type": "String"
 			},
 			{
-				"name": "amount",
-				"type": "String"
-			},
-			{
-				"name": "date ",
+				"name": "gender",
 				"type": "String"
 			}
 		]

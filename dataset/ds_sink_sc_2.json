@@ -1,20 +1,20 @@
 {
-	"name": "sales_output_herovired_ds",
+	"name": "ds_sink_sc_2",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorageLS",
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "herovired_project"
+			"name": "Scenario-based-question/scenario-2"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "sales_data.csv",
-				"fileSystem": "herovired-raw"
+				"folderPath": "scenario-2/output",
+				"fileSystem": "scenario-practice"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
