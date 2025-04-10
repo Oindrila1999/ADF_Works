@@ -1,0 +1,22 @@
+{
+	"name": "ds_source_sc_5",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Scenario-based-question/scenario-5"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "fixed_length_file.txt",
+				"folderPath": "scenario-5",
+				"fileSystem": "scenario-practice"
+			}
+		}
+	}
+}
