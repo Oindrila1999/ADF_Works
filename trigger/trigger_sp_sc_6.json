@@ -1,0 +1,25 @@
+{
+	"name": "trigger_sp_sc_6",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pipeline_sc_6",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 15,
+				"startTime": "2025-04-11T19:56:00",
+				"endTime": "2025-04-10T19:58:00",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}
