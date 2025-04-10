@@ -1,0 +1,61 @@
+{
+	"name": "dataflow_sc_5",
+	"properties": {
+		"folder": {
+			"name": "Scenario-based-question/scenario-5"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_source_sc_5",
+						"type": "DatasetReference"
+					},
+					"name": "fixedsource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sink_sc_5",
+						"type": "DatasetReference"
+					},
+					"name": "sink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "splitColumns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Column_1 as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> fixedsource",
+				"fixedsource derive(Id = substring(Column_1,1,4),",
+				"          Name = substring(Column_1,5,10),",
+				"          State = substring(Column_1,15,2),",
+				"          Contact = substring(Column_1,18)) ~> splitColumns",
+				"splitColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['Fixed_split.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          Id,",
+				"          Name,",
+				"          State,",
+				"          Contact",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> sink"
+			]
+		}
+	}
+}
