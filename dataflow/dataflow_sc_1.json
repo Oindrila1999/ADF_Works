@@ -1,0 +1,103 @@
+{
+	"name": "dataflow_sc_1",
+	"properties": {
+		"description": "Split the records as per data validation.",
+		"folder": {
+			"name": "Scenario-based-question/scenario-1"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_source_sc_1",
+						"type": "DatasetReference"
+					},
+					"name": "salessource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sink_sc_1",
+						"type": "DatasetReference"
+					},
+					"name": "tblsalessink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sink_bad_sc_1",
+						"type": "DatasetReference"
+					},
+					"name": "tblsalesbadsink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "splitbasedondatavalidation"
+				},
+				{
+					"name": "derivedfilename"
+				},
+				{
+					"name": "derivedfileName1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          saleDate as string,",
+				"          saleItem as string,",
+				"          country as string,",
+				"          quantity as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> salessource",
+				"salessource split(!isNull(toDate(saleDate,'dd-MMM-yyyy')),",
+				"     disjoint: false) ~> splitbasedondatavalidation@(goodRec, badRec)",
+				"splitbasedondatavalidation@goodRec derive(FileName = 'salesIND-2020-MAY-01.csv',",
+				"          saleDate = toDate(saleDate, 'dd-MMM-yyyy')) ~> derivedfilename",
+				"splitbasedondatavalidation@badRec derive(BadFile = 'sales-bad-record.csv') ~> derivedfileName1",
+				"derivedfilename sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          saleDate as date,",
+				"          saleItem as string,",
+				"          country as string,",
+				"          quantity as integer,",
+				"          filename as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          saleDate,",
+				"          saleItem,",
+				"          country,",
+				"          quantity,",
+				"          filename = FileName",
+				"     )) ~> tblsalessink",
+				"derivedfileName1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          saleDate,",
+				"          saleItem,",
+				"          country,",
+				"          quantity,",
+				"          filename = BadFile",
+				"     )) ~> tblsalesbadsink"
+			]
+		}
+	}
+}
