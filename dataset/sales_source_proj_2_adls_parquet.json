@@ -1,0 +1,49 @@
+{
+	"name": "sales_source_proj_2_adls_parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "herovired_project"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "part-00000-tid-3492786193996661090-d6fd3986-9077-4a60-8815-1b5c28ce21f1-19-1.c000.snappy.parquet",
+				"folderPath": "sales_data_transformed",
+				"fileSystem": "herovired-processed"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "Date",
+				"type": "DATE"
+			},
+			{
+				"name": "Product",
+				"type": "UTF8"
+			},
+			{
+				"name": "Region",
+				"type": "UTF8"
+			},
+			{
+				"name": "UnitsSold",
+				"type": "INT_32"
+			},
+			{
+				"name": "UnitPrice",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "TotalSale",
+				"type": "DOUBLE"
+			}
+		]
+	}
+}
