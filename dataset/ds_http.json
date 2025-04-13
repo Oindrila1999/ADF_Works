@@ -5,6 +5,11 @@
 			"referenceName": "HttpServerLS",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"URL": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "Adventure-work-project"
 		},
@@ -13,7 +18,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "HttpServerLocation",
-				"relativeUrl": "Adventure-Work-Data-Engineering-Project/tree/main/data/"
+				"relativeUrl": {
+					"value": "@dataset().URL",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
