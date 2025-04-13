@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'Linkedservice_StorageDemoOin'"
 		},
+		"PracticeDatabricksLS_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'PracticeDatabricksLS'"
+		},
 		"SqlServerLS_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'SqlServerLS'"
@@ -22,6 +26,10 @@
 		"AzureDataLakeStorageLS_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://storageadlsdemooin.dfs.core.windows.net/"
+		},
+		"PracticeDatabricksLS_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0226-105505-owdy0hhd"
 		},
 		"SqlServerLS_properties_typeProperties_server": {
 			"type": "string",
@@ -88,11 +96,17 @@
 					"Linkedservice_StorageDemoOin_connectionString": {
 						"value": "[parameters('Linkedservice_StorageDemoOin_connectionString')]"
 					},
+					"PracticeDatabricksLS_accessToken": {
+						"value": "[parameters('PracticeDatabricksLS_accessToken')]"
+					},
 					"SqlServerLS_password": {
 						"value": "[parameters('SqlServerLS_password')]"
 					},
 					"AzureDataLakeStorageLS_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorageLS_properties_typeProperties_url')]"
+					},
+					"PracticeDatabricksLS_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('PracticeDatabricksLS_properties_typeProperties_existingClusterId')]"
 					},
 					"SqlServerLS_properties_typeProperties_server": {
 						"value": "[parameters('SqlServerLS_properties_typeProperties_server')]"
@@ -240,6 +254,26 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_6')]"
+			]
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_8",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_8.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container": {
 						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container')]"
@@ -259,7 +293,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_6')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_7')]"
 			]
 		}
 	]

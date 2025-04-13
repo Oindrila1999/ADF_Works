@@ -11,11 +11,17 @@
 		"Linkedservice_StorageDemoOin_connectionString": {
 			"value": ""
 		},
+		"PracticeDatabricksLS_accessToken": {
+			"value": ""
+		},
 		"SqlServerLS_password": {
 			"value": ""
 		},
 		"AzureDataLakeStorageLS_properties_typeProperties_url": {
 			"value": "https://storageadlsdemooin.dfs.core.windows.net/"
+		},
+		"PracticeDatabricksLS_properties_typeProperties_existingClusterId": {
+			"value": "0226-105505-owdy0hhd"
 		},
 		"SqlServerLS_properties_typeProperties_server": {
 			"value": "myserver789.database.windows.net"
