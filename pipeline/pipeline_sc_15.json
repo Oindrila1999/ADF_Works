@@ -61,12 +61,12 @@
 							"userProperties": [],
 							"typeProperties": {
 								"on": {
-									"value": "@item().name",
+									"value": "@replace(item().name,'.csv','')",
 									"type": "Expression"
 								},
 								"cases": [
 									{
-										"value": "AdventureWorks_Products.csv",
+										"value": "AdventureWorks_Products",
 										"activities": [
 											{
 												"name": "Copy data2",
@@ -136,73 +136,76 @@
 												]
 											}
 										]
-									}
-								],
-								"defaultActivities": [
+									},
 									{
-										"name": "Copy data1",
-										"type": "Copy",
-										"dependsOn": [],
-										"policy": {
-											"timeout": "0.12:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"source": {
-												"type": "DelimitedTextSource",
-												"storeSettings": {
-													"type": "AzureBlobFSReadSettings",
-													"recursive": true,
-													"enablePartitionDiscovery": false
-												},
-												"formatSettings": {
-													"type": "DelimitedTextReadSettings"
-												}
-											},
-											"sink": {
-												"type": "DelimitedTextSink",
-												"storeSettings": {
-													"type": "AzureBlobFSWriteSettings"
-												},
-												"formatSettings": {
-													"type": "DelimitedTextWriteSettings",
-													"quoteAllText": true,
-													"fileExtension": ".txt"
-												}
-											},
-											"enableStaging": false,
-											"translator": {
-												"type": "TabularTranslator",
-												"typeConversion": true,
-												"typeConversionSettings": {
-													"allowDataTruncation": true,
-													"treatBooleanAsNumber": false
-												}
-											}
-										},
-										"inputs": [
+										"value": "AdventureWorks_Sales_2016",
+										"activities": [
 											{
-												"referenceName": "ds_source_sc_15_copy1",
-												"type": "DatasetReference",
-												"parameters": {
-													"file": {
-														"value": "@item.name",
-														"type": "Expression"
+												"name": "Copy data1",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "DelimitedTextSource",
+														"storeSettings": {
+															"type": "AzureBlobFSReadSettings",
+															"recursive": true,
+															"enablePartitionDiscovery": false
+														},
+														"formatSettings": {
+															"type": "DelimitedTextReadSettings"
+														}
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
 													}
-												}
-											}
-										],
-										"outputs": [
-											{
-												"referenceName": "ds_sink_sc_15_copy1",
-												"type": "DatasetReference",
-												"parameters": {
-													"folder": "scenario-15/output/Sales"
-												}
+												},
+												"inputs": [
+													{
+														"referenceName": "ds_source_sc_15_copy1",
+														"type": "DatasetReference",
+														"parameters": {
+															"file": {
+																"value": "@item.name",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "ds_sink_sc_15_copy1",
+														"type": "DatasetReference",
+														"parameters": {
+															"folder": "scenario-15/output/Sales"
+														}
+													}
+												]
 											}
 										]
 									}
