@@ -52,7 +52,8 @@
 						"value": "@activity('Get Metadata').output.childItems",
 						"type": "Expression"
 					},
-					"isSequential": true,
+					"isSequential": false,
+					"batchCount": 2,
 					"activities": [
 						{
 							"name": "Switch",
@@ -118,7 +119,10 @@
 														"referenceName": "ds_source_sc_15_copy1",
 														"type": "DatasetReference",
 														"parameters": {
-															"file": "AdventureWorks_Products.csv"
+															"file": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
 														}
 													}
 												],
@@ -187,7 +191,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"file": {
-														"value": "@activity('Get Metadata').output.itemName",
+														"value": "@item().name",
 														"type": "Expression"
 													}
 												}
