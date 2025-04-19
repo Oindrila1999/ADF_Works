@@ -1,0 +1,80 @@
+{
+	"name": "ds_source_sc_15_copy1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"file": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Scenario-based-question/scenario-15"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().file",
+					"type": "Expression"
+				},
+				"folderPath": "scenraio-15/input",
+				"fileSystem": "scenario-practice"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "ProductKey",
+				"type": "String"
+			},
+			{
+				"name": "ProductSubcategoryKey",
+				"type": "String"
+			},
+			{
+				"name": "ProductSKU",
+				"type": "String"
+			},
+			{
+				"name": "ProductName",
+				"type": "String"
+			},
+			{
+				"name": "ModelName",
+				"type": "String"
+			},
+			{
+				"name": "ProductDescription",
+				"type": "String"
+			},
+			{
+				"name": "ProductColor",
+				"type": "String"
+			},
+			{
+				"name": "ProductSize",
+				"type": "String"
+			},
+			{
+				"name": "ProductStyle",
+				"type": "String"
+			},
+			{
+				"name": "ProductCost",
+				"type": "String"
+			},
+			{
+				"name": "ProductPrice",
+				"type": "String"
+			}
+		]
+	}
+}
