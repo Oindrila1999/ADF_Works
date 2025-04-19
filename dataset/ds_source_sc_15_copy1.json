@@ -22,7 +22,7 @@
 					"value": "@dataset().file",
 					"type": "Expression"
 				},
-				"folderPath": "scenraio-15/input",
+				"folderPath": "scenario-15/input",
 				"fileSystem": "scenario-practice"
 			},
 			"columnDelimiter": ",",
