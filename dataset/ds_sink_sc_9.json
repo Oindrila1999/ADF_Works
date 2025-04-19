@@ -1,12 +1,15 @@
 {
-	"name": "ds_source_sc_9",
+	"name": "ds_sink_sc_9",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "HttpServerLS",
+			"referenceName": "AzureDataLakeStorageLS",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"p_filename": {
+			"file": {
+				"type": "string"
+			},
+			"folder": {
 				"type": "string"
 			}
 		},
@@ -17,15 +20,20 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "HttpServerLocation",
-				"relativeUrl": {
-					"value": "@concat('Oindrila1999/Adventure-Work-Data-Engineering-Project/refs/heads/main/data/',dataset().p_filename)",
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().file",
 					"type": "Expression"
-				}
+				},
+				"folderPath": {
+					"value": "@concat('scenraio-9/',dataset().folder)",
+					"type": "Expression"
+				},
+				"fileSystem": "scenario-practice"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
-			"firstRowAsHeader": false,
+			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
 		"schema": []
