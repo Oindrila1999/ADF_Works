@@ -1,5 +1,5 @@
 {
-	"name": "pipeline1",
+	"name": "pipeline_sc_15",
 	"properties": {
 		"activities": [
 			{
@@ -27,6 +27,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
@@ -91,19 +92,50 @@
 															"type": "DelimitedTextReadSettings"
 														}
 													},
-													"enableStaging": false
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
 												},
 												"inputs": [
 													{
 														"referenceName": "ds_source_sc_15_copy1",
-														"type": "DatasetReference"
+														"type": "DatasetReference",
+														"parameters": {
+															"file": {
+																"value": "@item.name",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "ds_sink_sc_15_copy1",
+														"type": "DatasetReference",
+														"parameters": {
+															"folder": "scenario-15/output/Products"
+														}
 													}
 												]
 											}
 										]
-									},
-									{
-										"value": "Case2"
 									}
 								],
 								"defaultActivities": [
@@ -167,7 +199,10 @@
 										"outputs": [
 											{
 												"referenceName": "ds_sink_sc_15_copy1",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"folder": "scenario-15/output/Sales"
+												}
 											}
 										]
 									}
