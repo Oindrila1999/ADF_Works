@@ -118,10 +118,7 @@
 														"referenceName": "ds_source_sc_15_copy1",
 														"type": "DatasetReference",
 														"parameters": {
-															"file": {
-																"value": "@item.name",
-																"type": "Expression"
-															}
+															"file": "AdventureWorks_Products.csv"
 														}
 													}
 												],
@@ -190,7 +187,7 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"file": {
-														"value": "@item.name",
+														"value": "@activity('Get Metadata').output.itemName",
 														"type": "Expression"
 													}
 												}
