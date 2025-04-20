@@ -1,0 +1,61 @@
+{
+	"name": "pipeline_sc_24",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "GET",
+					"url": "https://keyvaultoin.vault.azure.net/secrets/ADLSaccesskey/e146b03635d54132afe5cd9ebe56911f?api-version=7.0",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Web1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "secret_val",
+					"value": {
+						"value": "@activity('Web1').output.value",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"secret_val": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Scenario-based-question/scenario-24"
+		},
+		"annotations": []
+	}
+}
