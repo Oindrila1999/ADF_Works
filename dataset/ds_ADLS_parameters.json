@@ -1,0 +1,35 @@
+{
+	"name": "ds_ADLS_parameters",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Adventure-work-project"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "git.json",
+				"fileSystem": "parameters"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"Rel_URL": {
+					"type": "string"
+				},
+				"dest_folder": {
+					"type": "string"
+				},
+				"dest_file": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
