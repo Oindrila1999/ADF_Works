@@ -13,6 +13,73 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/SqlDBDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SqlServerLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "OUTPUTFOLDERS"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/after_until_output')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Linkedservice_StorageDemoOin",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "after_until_output.txt",
+						"folderPath": "output",
+						"container": "adfdemoin"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/all_file_out_by_copy')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorageLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output_all_files",
+						"fileSystem": "adfdemooinadls"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/alter_row_out_ds')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -191,6 +258,88 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_ADLS_bronze')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorageLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"filename": {
+						"type": "string"
+					},
+					"folder": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Adventure-work-project"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().folder",
+							"type": "Expression"
+						},
+						"fileSystem": "bronze"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_ADLS_parameters')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorageLS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Adventure-work-project"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "git.json",
+						"fileSystem": "parameters"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"Rel_URL": {
+							"type": "string"
+						},
+						"dest_folder": {
+							"type": "string"
+						},
+						"dest_file": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_all_files')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -327,6 +476,42 @@
 						"fileName": "out.csv",
 						"folderPath": "output_global_param",
 						"fileSystem": "adfdemooinadls"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_http')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "HttpServerLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"URL": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Adventure-work-project"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation",
+						"relativeUrl": {
+							"value": "@dataset().URL",
+							"type": "Expression"
+						}
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
@@ -529,221 +714,6 @@
 						"type": "Expression"
 					}
 				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_sink_ds_3')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorageLS",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-3"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "scenario-3/output",
-						"fileSystem": "scenario-practice"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_sink_sc_1')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SqlServerLS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"tablename": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-1"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [
-					{
-						"name": "saleDate",
-						"type": "date"
-					},
-					{
-						"name": "saleItem",
-						"type": "varchar"
-					},
-					{
-						"name": "country",
-						"type": "varchar"
-					},
-					{
-						"name": "quantity",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "filename",
-						"type": "varchar"
-					}
-				],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": {
-						"value": "@dataset().tablename",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_sink_sc_2')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorageLS",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-2"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "scenario-2/output",
-						"fileSystem": "scenario-practice"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_sink_sc_5')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorageLS",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-5"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "scenario-5/output",
-						"fileSystem": "scenario-practice"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_source_sc_1')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorageLS",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-1"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "salesIND-2020-MAY-01.csv",
-						"folderPath": "scenario-1",
-						"fileSystem": "scenario-practice"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "saleDate",
-						"type": "String"
-					},
-					{
-						"name": "saleItem",
-						"type": "String"
-					},
-					{
-						"name": "country",
-						"type": "String"
-					},
-					{
-						"name": "quantity",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_source_sc_2')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorageLS",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-2"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "scenario-2/input",
-						"fileSystem": "scenario-practice"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
 			},
 			"dependsOn": []
 		}

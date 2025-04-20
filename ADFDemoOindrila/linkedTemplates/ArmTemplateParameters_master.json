@@ -20,6 +20,9 @@
 		"AzureDataLakeStorageLS_properties_typeProperties_url": {
 			"value": "https://storageadlsdemooin.dfs.core.windows.net/"
 		},
+		"HttpServerLS_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/"
+		},
 		"PracticeDatabricksLS_properties_typeProperties_existingClusterId": {
 			"value": "0226-105505-owdy0hhd"
 		},

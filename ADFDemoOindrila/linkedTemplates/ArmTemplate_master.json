@@ -27,6 +27,10 @@
 			"type": "string",
 			"defaultValue": "https://storageadlsdemooin.dfs.core.windows.net/"
 		},
+		"HttpServerLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/"
+		},
 		"PracticeDatabricksLS_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0226-105505-owdy0hhd"
@@ -104,6 +108,9 @@
 					},
 					"AzureDataLakeStorageLS_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorageLS_properties_typeProperties_url')]"
+					},
+					"HttpServerLS_properties_typeProperties_url": {
+						"value": "[parameters('HttpServerLS_properties_typeProperties_url')]"
 					},
 					"PracticeDatabricksLS_properties_typeProperties_existingClusterId": {
 						"value": "[parameters('PracticeDatabricksLS_properties_typeProperties_existingClusterId')]"
@@ -274,6 +281,26 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_7')]"
+			]
+		},
+		{
+			"name": "ADFDemoOindrila_ArmTemplate_9",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_9.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container": {
 						"value": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container')]"
@@ -293,7 +320,7 @@
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_7')]"
+				"[resourceId('Microsoft.Resources/deployments', 'ADFDemoOindrila_ArmTemplate_8')]"
 			]
 		}
 	]

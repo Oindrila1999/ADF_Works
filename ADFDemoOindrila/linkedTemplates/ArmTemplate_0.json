@@ -27,6 +27,10 @@
 			"type": "string",
 			"defaultValue": "https://storageadlsdemooin.dfs.core.windows.net/"
 		},
+		"HttpServerLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/"
+		},
 		"PracticeDatabricksLS_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0226-105505-owdy0hhd"
@@ -133,6 +137,156 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_sc_24')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Web1",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {},
+							"url": "https://keyvaultoin.vault.azure.net/secrets/ADLSaccesskey/e146b03635d54132afe5cd9ebe56911f?api-version=7.0",
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Web1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "secret_val",
+							"value": {
+								"value": "@activity('Web1').output.value",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"secret_val": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Scenario-based-question/scenario-24"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline_sc_24_dynamic')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Web1",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {},
+							"url": {
+								"value": "https://@{pipeline().parameters.keyvault_name}.vault.azure.net/secrets/@{pipeline().parameters.secret_name}/@{pipeline().parameters.secret_info}?api-version=7.0",
+								"type": "Expression"
+							},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Web1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "secret_val",
+							"value": {
+								"value": "@activity('Web1').output.value",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"keyvault_name": {
+						"type": "string"
+					},
+					"secret_name": {
+						"type": "string"
+					},
+					"secret_info": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"secret_val": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Scenario-based-question/scenario-24"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/web_activity_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -218,6 +372,21 @@
 						"type": "SecureString",
 						"value": "[parameters('AzureDataLakeStorageLS_accountKey')]"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/HttpServerLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('HttpServerLS_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
 				}
 			},
 			"dependsOn": []
@@ -728,79 +897,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/Linkedservice_StorageDemoOin')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SqlDBDataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "SqlServerLS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "OUTPUTFOLDERS"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/SqlServerLS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/after_until_output')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "Linkedservice_StorageDemoOin",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Binary",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "after_until_output.txt",
-						"folderPath": "output",
-						"container": "adfdemoin"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/Linkedservice_StorageDemoOin')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/all_file_out_by_copy')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorageLS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "output_all_files",
-						"fileSystem": "adfdemooinadls"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorageLS')]"
 			]
 		}
 	]

@@ -6,26 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "ADFDemoOindrila"
-		},
-		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container": {
-			"type": "string",
-			"defaultValue": "adfdemoin"
-		},
-		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_folder": {
-			"type": "string",
-			"defaultValue": "input"
-		},
-		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_file": {
-			"type": "string",
-			"defaultValue": "empsorceData.csv"
-		},
-		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFolder": {
-			"type": "string",
-			"defaultValue": "output"
-		},
-		"trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFile": {
-			"type": "string",
-			"defaultValue": "test_params.csv"
 		}
 	},
 	"variables": {
@@ -33,13 +13,465 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/flatten_trans_dataflow_pipeline')]",
+			"name": "[concat(parameters('factoryName'), '/sort_trans_dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "empDataset_lkp_transformation",
+								"type": "DatasetReference"
+							},
+							"name": "employee"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "emp_sort_trans_dataset",
+								"type": "DatasetReference"
+							},
+							"name": "emporderedsink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "sortdeptidcntry"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          empid as integer,",
+						"          name as string,",
+						"          country as string,",
+						"          deptid as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> employee",
+						"employee sort(asc(deptid, true),",
+						"     desc(country, true)) ~> sortdeptidcntry",
+						"sortdeptidcntry sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          empid as integer,",
+						"          name as string,",
+						"          country as string,",
+						"          deptid as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     mapColumn(",
+						"          empid,",
+						"          name,",
+						"          country,",
+						"          deptid",
+						"     )) ~> emporderedsink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/stringify_trans_dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_json_stringify",
+								"type": "DatasetReference"
+							},
+							"name": "jsondata"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "stringify_json_out",
+								"type": "DatasetReference"
+							},
+							"name": "stringifysink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "stringify"
+						},
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          name as string,",
+						"          skills as string[],",
+						"          contact as (mobile as string, landline as string)",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'documentPerLine') ~> jsondata",
+						"jsondata stringify(contactStringify = contact ? string,",
+						"     format: 'json') ~> stringify",
+						"stringify derive(contactStringify = toString(contactStringify)) ~> derivedColumn1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['stringify_out.json'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> stringifysink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/surr_key_trans_dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "input_dataset_sugg_key",
+								"type": "DatasetReference"
+							},
+							"name": "source"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "surr_ds_output",
+								"type": "DatasetReference"
+							},
+							"name": "surrkeysink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "surrogateKeygenerate"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          Country as string,",
+						"          Emp as string",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source",
+						"source keyGenerate(output(empid as long),",
+						"     startAt: 1L,",
+						"     stepValue: 1L) ~> surrogateKeygenerate",
+						"surrogateKeygenerate sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          id as string,",
+						"          name as string,",
+						"          sales as string,",
+						"          date as string",
+						"     ),",
+						"     partitionFileNames:['surr_key_out.csv'],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> surrkeysink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/union_dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "union_dataset_1",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						},
+						{
+							"dataset": {
+								"referenceName": "union_dataset_2",
+								"type": "DatasetReference"
+							},
+							"name": "source2"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "union_out_dataset",
+								"type": "DatasetReference"
+							},
+							"name": "targetemp"
+						}
+					],
+					"transformations": [
+						{
+							"name": "union2source"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          id as integer,",
+						"          ename as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source1",
+						"source(output(",
+						"          id as integer,",
+						"          ename as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source2",
+						"source1, source2 union(byName: true)~> union2source",
+						"union2source sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          id as integer,",
+						"          ename as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     mapColumn(",
+						"          id,",
+						"          ename",
+						"     )) ~> targetemp"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/unpivot_trans_dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "source_ds_unpivot",
+								"type": "DatasetReference"
+							},
+							"name": "sourceforunpivot"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "unpivot_out_dataset",
+								"type": "DatasetReference"
+							},
+							"name": "unpivotoutsink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "unpivot"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          PO as integer,",
+						"          Vendor as string,",
+						"          Apple as integer,",
+						"          Mango as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> sourceforunpivot",
+						"sourceforunpivot unpivot(output(",
+						"          Fruits as string,",
+						"          Amount as integer",
+						"     ),",
+						"     ungroupBy(Vendor,",
+						"          PO),",
+						"     lateral: true,",
+						"     ignoreNullPivots: false) ~> unpivot",
+						"unpivot sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          deptid as string,",
+						"          count_of_emp as string",
+						"     ),",
+						"     partitionFileNames:['purcchase_order_unpivot.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> unpivotoutsink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/windows_trans_dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "input_ds_window_trans",
+								"type": "DatasetReference"
+							},
+							"name": "sourceforranking"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "window_trans_out_ds",
+								"type": "DatasetReference"
+							},
+							"name": "windowssink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "windowtransbydept"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     Filename as string",
+						"}",
+						"source(output(",
+						"          id as integer,",
+						"          name as string,",
+						"          gender as string,",
+						"          salary as integer,",
+						"          dept as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> sourceforranking",
+						"sourceforranking window(over(dept),",
+						"     desc(salary, true),",
+						"     dense_rank = denseRank(),",
+						"          rank = rank(),",
+						"          row_num = rowNumber(),",
+						"          cum_sum = cumeDist(),",
+						"          avg_sal = avg(salary)) ~> windowtransbydept",
+						"windowtransbydept sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          deptid as string,",
+						"          count_of_emp as string",
+						"     ),",
+						"     partitionFileNames:[($Filename)],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> windowssink"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/write_cache_sink_dataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "input_ds_window_trans",
+								"type": "DatasetReference"
+							},
+							"name": "empdata"
+						}
+					],
+					"sinks": [
+						{
+							"name": "cacheMaxSal"
+						}
+					],
+					"transformations": [
+						{
+							"name": "getmaxSal"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          id as integer,",
+						"          name as string,",
+						"          gender as string,",
+						"          salary as integer,",
+						"          dept as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> empdata",
+						"empdata aggregate(max_sal = max(salary)) ~> getmaxSal",
+						"getmaxSal sink(validateSchema: false,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     store: 'cache',",
+						"     format: 'inline',",
+						"     output: true,",
+						"     saveOrder: 1,",
+						"     mapColumn(",
+						"          max_sal",
+						"     )) ~> cacheMaxSal"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Alter_Row_trans_Dataflow_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Flatten_trans_Dataflow",
+						"name": "Alter_Row_trans_Dataflow",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -52,12 +484,12 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "flatten_trans_dataflow",
+								"referenceName": "alter_row_trans_dataflow",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"source1": {},
-									"flattenoutsink": {}
+									"sourcedsemp": {},
+									"sinktbloutput": {}
 								}
 							},
 							"staging": {},
@@ -73,19 +505,19 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2025-04-02T16:27:33Z"
+				"lastPublishTime": "2025-04-02T12:36:12Z"
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/group_by_powerquery_pipeline')]",
+			"name": "[concat(parameters('factoryName'), '/Cache_Sink_Dataflow_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "group_by_powerquery",
-						"type": "ExecuteWranglingDataflow",
+						"name": "Cache_Sink_Dataflow",
+						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -97,11 +529,302 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "group_by_powerquery",
+								"referenceName": "cache_sink_dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"emptable": {},
+									"empdetails1": {},
+									"countrytable": {},
+									"cacheMaxEmpID": {},
+									"cacheCountryName": {},
+									"emptableinserts": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Execute_actvty_master_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute_1",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Copy_pipeline_params",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"container": {
+									"value": "@pipeline().parameters.container",
+									"type": "Expression"
+								},
+								"folder": {
+									"value": "@pipeline().parameters.srcfolder",
+									"type": "Expression"
+								},
+								"file": {
+									"value": "@pipeline().parameters.srcfile",
+									"type": "Expression"
+								},
+								"destFolder": {
+									"value": "@pipeline().parameters.destfolder",
+									"type": "Expression"
+								},
+								"destFile": {
+									"value": "@pipeline().parameters.destfile",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute_2",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute_1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Set_var_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"FileName": {
+									"value": "@pipeline().parameters.srcfile",
+									"type": "Expression"
+								},
+								"container": {
+									"value": "@pipeline().parameters.container",
+									"type": "Expression"
+								},
+								"sourceFolder": {
+									"value": "@pipeline().parameters.srcfolder",
+									"type": "Expression"
+								},
+								"destFolder": {
+									"value": "@pipeline().parameters.destfolder",
+									"type": "Expression"
+								},
+								"destFileext": {
+									"value": "@pipeline().parameters.destFileExt",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"srcfolder": {
+						"type": "string"
+					},
+					"srcfile": {
+						"type": "string"
+					},
+					"destfolder": {
+						"type": "string"
+					},
+					"destfile": {
+						"type": "string"
+					},
+					"destFileExt": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-03-30T11:28:32Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IngestSalesCSV')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "sales_input_herovired_ds",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sales_output_herovired_ds",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Copy data1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "TransformSalesData_dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"salessource": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "herovired_project"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Merge_queries_powerquery_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Merge_queries_powerquery",
+						"type": "ExecuteWranglingDataflow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [
+							{
+								"name": "Execution of",
+								"value": "Here we are executing the Power Query for wrangling data flow in ADF."
+							}
+						],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "merge_queries_powerquery",
 								"type": "DataFlowReference",
 								"datasetParameters": {
-									"empdataset_derived_df": {},
-									"UserQuerygroupbypowerqueryds": {}
+									"empdataset_adls": {},
+									"departmentdataset_adls": {},
+									"UserQueryempdeptpowerqueryds": {
+										"Filename": {
+											"value": "@pipeline().parameters.Filename",
+											"type": "Expression"
+										}
+									}
 								}
 							},
 							"staging": {},
@@ -114,13 +837,18 @@
 									"queryName": "UserQuery",
 									"dataflowSinks": [
 										{
-											"name": "UserQuerygroupbypowerqueryds",
+											"name": "UserQueryempdeptpowerqueryds",
 											"dataset": {
-												"referenceName": "group_by_powerquery_ds",
+												"referenceName": "emp_dept_power_query_ds",
 												"type": "DatasetReference",
-												"parameters": {}
+												"parameters": {
+													"Filename": {
+														"value": "@pipeline().parameters.Filename",
+														"type": "Expression"
+													}
+												}
 											},
-											"script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UserQuerygroupbypowerqueryds"
+											"script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tdeptid as string,\n\t\tcount_of_emp as string\n\t),\n\tumask: 0022,\n\tpreCommands: [],\n\tpostCommands: [],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UserQueryempdeptpowerqueryds"
 										}
 									]
 								}
@@ -131,316 +859,24 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"annotations": [],
-				"lastPublishTime": "2025-04-04T05:49:29Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/join_dataflow_pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "join_dataflow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "join_dataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"employee": {},
-									"department": {},
-									"empdept": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-03-31T14:27:10Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/lookup_dataflow_pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup_Dataflow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "lookup_trans_dataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"employee": {},
-									"department": {},
-									"empwithdeptname": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-04-01T11:33:46Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/new_branch_pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "New_branch_Dataflow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "new_branch_work_dataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"employee": {},
-									"department": {},
-									"empcountsink": {},
-									"joineddatasink": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-04-01T13:19:01Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline_sc_1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "dataflow_sc_1",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "dataflow_sc_1",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"salessource": {},
-									"tblsalessink": {
-										"tablename": {
-											"value": "@pipeline().parameters.table_name",
-											"type": "Expression"
-										}
-									},
-									"tblsalesbadsink": {
-										"BadTableName": {
-											"value": "@pipeline().parameters.table_name_bad",
-											"type": "Expression"
-										}
-									}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
 				"parameters": {
-					"table_name": {
-						"type": "string"
-					},
-					"table_name_bad": {
+					"Filename": {
 						"type": "string"
 					}
 				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-1"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline_sc_5')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Split_fixed_length_File",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "dataflow_sc_5",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"fixedsource": {},
-									"sink": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "Scenario-based-question/scenario-5"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/select_trans_dataflow_pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Select_Dataflow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "select_trans_dataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"employee": {},
-									"selectedcolssink": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
 				"annotations": [],
-				"lastPublishTime": "2025-04-01T13:19:02Z"
+				"lastPublishTime": "2025-04-04T05:34:05Z"
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/sort_dataflow_pipeline')]",
+			"name": "[concat(parameters('factoryName'), '/Parse_trans_dataflow_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Sort_trans_Dataflow",
+						"name": "Parse_trans_dataflow",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -453,57 +889,12 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "sort_trans_dataflow",
+								"referenceName": "parse_trans_dataflow",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"employee": {},
-									"emporderedsink": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-04-01T11:33:46Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/stringify_trans_Dataflow_pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "stringify_trans_Dataflow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "stringify_trans_dataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"jsondata": {},
-									"stringifysink": {}
+									"emptable": {},
+									"sink1": {}
 								}
 							},
 							"staging": {},
@@ -523,13 +914,13 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/union_dataflow_pipeline')]",
+			"name": "[concat(parameters('factoryName'), '/Pivot_trans_dataflow_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Union_Dataflow",
+						"name": "Pivot_Dataflow",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -542,13 +933,12 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "union_dataflow",
+								"referenceName": "pivot_trans_dataflow",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"source1": {},
-									"source2": {},
-									"targetemp": {}
+									"empsource": {},
+									"sink1": {}
 								}
 							},
 							"staging": {},
@@ -564,18 +954,18 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2025-03-31T19:20:42Z"
+				"lastPublishTime": "2025-04-01T15:19:56Z"
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/unpivot_dataflow_pipeline')]",
+			"name": "[concat(parameters('factoryName'), '/Rank_trans_Dataflow_pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Unpivot_dataflow",
+						"name": "Rank_trans_Dataflow",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -588,136 +978,12 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "unpivot_trans_dataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"sourceforunpivot": {},
-									"unpivotoutsink": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-04-01T17:33:16Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/windows_trans_pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Windows_trans_Dataflow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "windows_trans_dataflow",
-								"type": "DataFlowReference",
-								"parameters": {
-									"Filename": {
-										"value": "'@{pipeline().parameters.filename}'",
-										"type": "Expression"
-									}
-								},
-								"datasetParameters": {
-									"sourceforranking": {},
-									"windowssink": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"filename": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-04-02T10:50:22Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/write_sink_cache_to_variable')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Set variable1",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Data flow1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "maxSal",
-							"value": {
-								"value": "@activity('Data flow1').output.runStatus.output.cacheMaxSal.value[0].max_sal",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "write_cache_sink_dataflow",
+								"referenceName": "rank_trans_dataflow",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
 									"empdata": {},
-									"cacheMaxSal": {}
+									"rankedsink": {}
 								}
 							},
 							"staging": {},
@@ -725,57 +991,273 @@
 								"coreCount": 8,
 								"computeType": "General"
 							},
-							"traceLevel": "None",
-							"cacheSinks": {
-								"firstRowOnly": true
-							}
+							"traceLevel": "Fine"
 						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"variables": {
-					"maxSal": {
-						"type": "Integer"
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Surr_trans_Dataflow_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Surr_trans_Dataflow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "surr_key_trans_dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source": {},
+									"surrkeysink": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-04-01T19:36:25Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/surr_key_trans_dataflow')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/aggregation_dataflow_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Aggregation_dataflow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "aggregation_dataflow",
+								"type": "DataFlowReference",
+								"parameters": {
+									"filename": {
+										"value": "'@{pipeline().parameters.destfile}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"empdetails": {},
+									"empaggdata": {
+										"filesystem": {
+											"value": "@pipeline().parameters.Filesystem",
+											"type": "Expression"
+										},
+										"destfolder": {
+											"value": "@pipeline().parameters.destfolder",
+											"type": "Expression"
+										},
+										"destfile": {
+											"value": "@pipeline().parameters.destfile",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Filesystem": {
+						"type": "string"
+					},
+					"destfolder": {
+						"type": "string"
+					},
+					"destfile": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-03-31T14:11:33Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/alter_row_trans_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Alter_Row_Dataflow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "alter_row_trans_dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourcedsemp": {},
+									"sinktbloutput": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-04-02T12:18:35Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/assert_trans_dataflow_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "assert_trans_dataflow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "assert_trans_dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"emp": {},
+									"dept": {},
+									"sinkassert": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
 				},
 				"annotations": []
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/trigger_pipeline_params')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
+			"name": "[concat(parameters('factoryName'), '/conditional_split_dataflow_pipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
+				"activities": [
 					{
-						"pipelineReference": {
-							"referenceName": "Copy_pipeline_params",
-							"type": "PipelineReference"
+						"name": "Conditional_split_Dataflow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
 						},
-						"parameters": {
-							"container": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_container')]",
-							"folder": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_folder')]",
-							"file": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_file')]",
-							"destFolder": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFolder')]",
-							"destFile": "[parameters('trigger_pipeline_params_properties_Copy_pipeline_params_parameters_destFile')]"
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "conditional_split_dataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"employee": {},
+									"ITemp": {},
+									"PayrollEmp": {},
+									"HREmp": {},
+									"DefaultEmp": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
 						}
 					}
 				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Hour",
-						"interval": 1,
-						"startTime": "2025-03-30T13:43:00",
-						"endTime": "2025-03-30T13:44:00",
-						"timeZone": "India Standard Time"
-					}
-				}
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-03-31T16:05:24Z"
 			},
 			"dependsOn": []
 		}
