@@ -1,0 +1,240 @@
+{
+	"name": "pipeline_sc_28",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Metadata1').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"value": "@if(contains(item().name,'_1'),pipeline().parameters.d_map1,pipeline().parameters.d_map2)",
+									"type": "Expression"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_source_sc_28_copy",
+									"type": "DatasetReference",
+									"parameters": {
+										"file": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_sink_sc_28",
+									"type": "DatasetReference",
+									"parameters": {
+										"file": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_source_sc_28",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"d_map1": {
+				"type": "object",
+				"defaultValue": {
+					"type": "TabularTranslator",
+					"mappings": [
+						{
+							"source": {
+								"name": "id",
+								"type": "String",
+								"physicalType": "String"
+							},
+							"sink": {
+								"name": "id",
+								"type": "String",
+								"physicalType": "String"
+							}
+						},
+						{
+							"source": {
+								"name": "name",
+								"type": "String",
+								"physicalType": "String"
+							},
+							"sink": {
+								"name": "name",
+								"type": "String",
+								"physicalType": "String"
+							}
+						},
+						{
+							"source": {
+								"name": "age",
+								"type": "String",
+								"physicalType": "String"
+							},
+							"sink": {
+								"name": "age",
+								"type": "String",
+								"physicalType": "String"
+							}
+						}
+					],
+					"typeConversion": true,
+					"typeConversionSettings": {
+						"allowDataTruncation": true,
+						"treatBooleanAsNumber": false
+					}
+				}
+			},
+			"d_map2": {
+				"type": "object",
+				"defaultValue": {
+					"type": "TabularTranslator",
+					"mappings": [
+						{
+							"source": {
+								"name": "id",
+								"type": "String",
+								"physicalType": "String"
+							},
+							"sink": {
+								"name": "id",
+								"type": "String",
+								"physicalType": "String"
+							}
+						},
+						{
+							"source": {
+								"name": "name",
+								"type": "String",
+								"physicalType": "String"
+							},
+							"sink": {
+								"name": "name",
+								"type": "String",
+								"physicalType": "String"
+							}
+						},
+						{
+							"source": {
+								"name": "salary",
+								"type": "String",
+								"physicalType": "String"
+							},
+							"sink": {
+								"name": "salary",
+								"type": "String",
+								"physicalType": "String"
+							}
+						},
+						{
+							"source": {
+								"name": "address",
+								"type": "String",
+								"physicalType": "String"
+							},
+							"sink": {
+								"name": "address",
+								"type": "String",
+								"physicalType": "String"
+							}
+						}
+					],
+					"typeConversion": true,
+					"typeConversionSettings": {
+						"allowDataTruncation": true,
+						"treatBooleanAsNumber": false
+					}
+				}
+			}
+		},
+		"folder": {
+			"name": "Scenario-based-question/scenario-28"
+		},
+		"annotations": []
+	}
+}
