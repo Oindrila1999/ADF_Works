@@ -1,0 +1,91 @@
+{
+	"name": "dataflow_sc_34_another",
+	"properties": {
+		"folder": {
+			"name": "Scenario-based-question/scenario-34"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_source_sc_34",
+						"type": "DatasetReference"
+					},
+					"name": "sourceduplicates"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sink_sc_34",
+						"type": "DatasetReference"
+					},
+					"name": "uniques"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sink_sc_34",
+						"type": "DatasetReference"
+					},
+					"name": "duplicates"
+				}
+			],
+			"transformations": [
+				{
+					"name": "windowCounts"
+				},
+				{
+					"name": "splitcond"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as string,",
+				"          name as string,",
+				"          sal as string,",
+				"          dept as string,",
+				"          date as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceduplicates",
+				"sourceduplicates window(over(id),",
+				"     counts = count(id)) ~> windowCounts",
+				"windowCounts split(counts==1,",
+				"     disjoint: false) ~> splitcond@(unique, duplicate)",
+				"splitcond@unique sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['uniques.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          sal,",
+				"          dept,",
+				"          date",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> uniques",
+				"splitcond@duplicate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['duplicates.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          sal,",
+				"          dept,",
+				"          date",
+				"     )) ~> duplicates"
+			]
+		}
+	}
+}
