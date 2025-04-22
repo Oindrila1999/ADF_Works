@@ -5,6 +5,11 @@
 			"referenceName": "AzureDataLakeStorageLS",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"file_name": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "Scenario-based-question/Incremental_Load"
 		},
