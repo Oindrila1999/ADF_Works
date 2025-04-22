@@ -84,7 +84,8 @@
 				"          sal,",
 				"          dept,",
 				"          date",
-				"     )) ~> duplicates"
+				"     ),",
+				"     partitionBy('hash', 1)) ~> duplicates"
 			]
 		}
 	}
