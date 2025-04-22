@@ -1,0 +1,113 @@
+{
+	"name": "dataflow_sc_34",
+	"properties": {
+		"folder": {
+			"name": "Scenario-based-question/scenario-34"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_source_sc_34",
+						"type": "DatasetReference"
+					},
+					"name": "duplicatesource"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sink_sc_34",
+						"type": "DatasetReference"
+					},
+					"name": "uniquesink"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sink_sc_34",
+						"type": "DatasetReference"
+					},
+					"name": "dupsink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggregateid"
+				},
+				{
+					"name": "joinwithOriginal"
+				},
+				{
+					"name": "split1"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          sal as integer,",
+				"          dept as string,",
+				"          date as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> duplicatesource",
+				"duplicatesource aggregate(groupBy(id),",
+				"     counts = count(id)) ~> aggregateid",
+				"aggregateid, duplicatesource join(aggregateid@id == duplicatesource@id,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinwithOriginal",
+				"select1 split(counts == 1,",
+				"     disjoint: false) ~> split1@(unique, duplicate)",
+				"joinwithOriginal select(mapColumn(",
+				"          id = duplicatesource@id,",
+				"          name,",
+				"          sal,",
+				"          dept,",
+				"          date,",
+				"          counts",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"split1@unique sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['uniques.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          sal,",
+				"          dept,",
+				"          date",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> uniquesink",
+				"split1@duplicate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['duplicates.csv'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          sal,",
+				"          dept,",
+				"          date",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> dupsink"
+			]
+		}
+	}
+}
