@@ -1,9 +1,9 @@
 {
-	"name": "pipeline1",
+	"name": "stg_to_bronze_incremental",
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
+				"name": "Lookup_watermark",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -16,18 +16,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
-						"referenceName": "ds_tbl_names",
+						"referenceName": "ds_watermark_tbl",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -38,7 +32,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "Lookup_watermark",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -47,46 +41,17 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup1').output.value",
+						"value": "@activity('Lookup_watermark').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Lookup_last_modify",
-							"type": "Lookup",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "SqlServerSource",
-									"sqlReaderQuery": {
-										"value": "@concat('select last_date from waterMark where table_name = \"',item().table_name,'\"')",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "ds_watermark_tbl",
-									"type": "DatasetReference"
-								},
-								"firstRowOnly": false
-							}
-						},
-						{
-							"name": "Copy data1",
+							"name": "Copy_stg_to_bronze",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "Lookup_last_modify",
+									"activity": "Lookup_max_date",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -102,20 +67,30 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "DelimitedTextSource",
-									"storeSettings": {
-										"type": "AzureBlobFSReadSettings",
-										"recursive": true,
-										"enablePartitionDiscovery": false
+									"type": "SqlServerSource",
+									"additionalColumns": [
+										{
+											"name": "Last_modified_date",
+											"value": ""
+										}
+									],
+									"sqlReaderQuery": {
+										"value": "@concat('select distinct * from ',\n        item().table_name,\n        ' where update_dt > ''',\n        item().last_date,\n        ''' and update_dt <= ''',\n        activity('Lookup_max_date').output.value[0].max_date,\n        '''')",
+										"type": "Expression"
 									},
-									"formatSettings": {
-										"type": "DelimitedTextReadSettings"
-									}
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
 								},
 								"sink": {
-									"type": "SqlServerSink",
-									"writeBehavior": "insert",
-									"sqlWriterUseTableLock": false
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
 								},
 								"enableStaging": false,
 								"translator": {
@@ -129,11 +104,11 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "ds_source_data",
+									"referenceName": "ds_stg_tables",
 									"type": "DatasetReference",
 									"parameters": {
-										"file": {
-											"value": "@item().file_name",
+										"table_name": {
+											"value": "@item().table_name",
 											"type": "Expression"
 										}
 									}
@@ -141,11 +116,11 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "ds_sink_tables",
+									"referenceName": "ds_bronze",
 									"type": "DatasetReference",
 									"parameters": {
-										"table_name": {
-											"value": "@item().table_name",
+										"file_name": {
+											"value": "@concat(substring(item().table_name, 0, indexOf(item().table_name, '_stg')), '_', activity('Lookup_max_date').output.value[0].max_date, '.parquet')",
 											"type": "Expression"
 										}
 									}
@@ -163,7 +138,72 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select max(update_dt) as max_date from ',item().table_name)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "ds_stg_tables",
+									"type": "DatasetReference",
+									"parameters": {
+										"table_name": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "sp_update_waterMark",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy_stg_to_bronze",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[sp_update_watermark]",
+								"storedProcedureParameters": {
+									"new_last_date": {
+										"value": {
+											"value": "@activity('Lookup_max_date').output.value[0].max_date",
+											"type": "Expression"
+										},
+										"type": "Datetime"
+									},
+									"table_name": {
+										"value": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "SqlServerLS",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
