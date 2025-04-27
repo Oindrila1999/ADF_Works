@@ -11,7 +11,7 @@
 			}
 		},
 		"folder": {
-			"name": "Scenario-based-question/Incremental_Load"
+			"name": "New project/Incremental_Load"
 		},
 		"annotations": [],
 		"type": "SqlServerTable",
