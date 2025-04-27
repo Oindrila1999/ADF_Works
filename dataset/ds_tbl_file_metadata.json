@@ -1,0 +1,36 @@
+{
+	"name": "ds_tbl_file_metadata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageLS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Scenario-based-question/Incremental_Load"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "table_name_list.json",
+				"folderPath": "Incremental_Load",
+				"fileSystem": "scenario-practice"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"source_file": {
+					"type": "string"
+				},
+				"stg_table_name": {
+					"type": "string"
+				},
+				"bronze_file": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
