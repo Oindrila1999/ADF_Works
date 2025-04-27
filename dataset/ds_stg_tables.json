@@ -1,5 +1,5 @@
 {
-	"name": "ds_sink_tables",
+	"name": "ds_stg_tables",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SqlServerLS",
