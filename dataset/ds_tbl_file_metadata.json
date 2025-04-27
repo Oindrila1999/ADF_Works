@@ -14,8 +14,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": "table_name_list.json",
-				"folderPath": "Incremental_Load",
-				"fileSystem": "scenario-practice"
+				"fileSystem": "raw"
 			}
 		},
 		"schema": {
