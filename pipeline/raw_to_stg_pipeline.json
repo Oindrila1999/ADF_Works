@@ -111,7 +111,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"file_name": {
-											"value": "@concat(substring(item().source_file,0,indexOf(item().source_file,'.csv')),'_',utcNow(),'.csv')",
+											"value": "@concat(substring(item().source_file,0,indexOf(item().source_file,'.csv')),'_',formatDateTime(utcNow(),'yyyy-MM-dd'),'.csv')",
 											"type": "Expression"
 										}
 									}
