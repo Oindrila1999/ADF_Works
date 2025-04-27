@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "table_name_list.csv",
+				"fileName": "table_name_list.json",
 				"folderPath": "Incremental_Load",
 				"fileSystem": "scenario-practice"
 			},
