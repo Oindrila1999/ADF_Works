@@ -71,7 +71,10 @@
 									"additionalColumns": [
 										{
 											"name": "Last_modified_date",
-											"value": ""
+											"value": {
+												"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+												"type": "Expression"
+											}
 										}
 									],
 									"sqlReaderQuery": {
